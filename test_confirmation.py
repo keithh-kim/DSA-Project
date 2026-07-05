@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit tests for ConfirmationManager (Component 4: Confirmation & HashSet)
 Owner: Wilson Yugi
 
