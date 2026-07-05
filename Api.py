@@ -69,9 +69,9 @@ INTEGRATION ISSUES FOUND, AND HOW THEY'RE RESOLVED
 from flask import Flask, jsonify
 
 from event_registry import EventRegistry, Seat as ModelSeat
-from seat_heap import EventSeatHeap
+from event_seat_heap import EventSeatHeap
 from event_held_seats import HeldSeatsManager
-from confirmation import ConfirmationManager
+from event_confirmation import ConfirmationManager
 
 # --------------------------------------------------------------------------
 # Issue 1 fix: give Keith's Seat the method Trent's heap requires.
