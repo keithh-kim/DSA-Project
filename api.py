@@ -219,7 +219,17 @@ class BookingService:
 # Flask API layer
 # --------------------------------------------------------------------------
 def create_app(service: BookingService) -> Flask:
-    app = Flask(__name__)
+    import os
+    static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+    app = Flask(__name__, static_folder=static_dir, static_url_path="")
+
+    index_path = os.path.join(static_dir, "index.html")
+    print(f"[startup] Looking for frontend at: {index_path}")
+    print(f"[startup] Found: {os.path.exists(index_path)}")
+
+    @app.get("/")
+    def index():
+        return app.send_static_file("index.html")
 
     @app.post("/events/<event_id>/select")
     def select(event_id):
@@ -253,6 +263,20 @@ def create_app(service: BookingService) -> Flask:
             "date": event.date,
             "seats_remaining": event.seat_heap.size(),
             "total_seats": len(event.available_seats),
+        }), 200
+
+    @app.get("/events/<event_id>/next-seat")
+    def next_seat(event_id):
+        """Read-only peek at the best available seat, WITHOUT holding it.
+        Lets the UI show 'next up: VIP-2, $150' before the user commits."""
+        event = service.registry.get_event(event_id)
+        if event is None:
+            return jsonify({"error": "event not found"}), 404
+        seat = event.seat_heap.peek()  # Trent's O(1) peek -- does not pop
+        if seat is None:
+            return jsonify({"seat": None}), 200
+        return jsonify({
+            "seat": {"seat_id": seat.seat_id, "tier": seat.tier, "price": seat.price}
         }), 200
 
     return app
