@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sol Fest Live - Box Office</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #140f1f;
+      --bg-panel: #1d1730;
+      --bg-panel-raised: #251d3d;
+      --line: #362b52;
+      --text: #f1ece3;
+      --text-dim: #a79bc4;
+      --gold: #e7b84b;
+      --teal: #35c9b5;
+      --danger: #e2555a;
+      --success: #6fcf97;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      background-image:
+        radial-gradient(circle at 15% 10%, rgba(231, 184, 75, 0.06), transparent 40%),
+        radial-gradient(circle at 85% 90%, rgba(53, 201, 181, 0.06), transparent 40%);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      padding: 40px 20px 80px;
+    }
+
+    .wrap {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    /* ---------- Header / marquee ---------- */
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(48px, 10vw, 84px);
+      letter-spacing: 0.03em;
+      margin: 0;
+      line-height: 0.95;
+      color: var(--gold);
+      text-shadow: 0 0 30px rgba(231, 184, 75, 0.25);
+    }
+
+    .subline {
+      font-size: 15px;
+      color: var(--text-dim);
+      margin-top: 10px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      margin-top: 24px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat .num {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .stat .label {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* ---------- Panels ---------- */
+    .panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+
+    .panel h2 {
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin: 0 0 18px;
+    }
+
+    /* ---------- Next seat / reserve ---------- */
+    .next-seat-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .seat-preview {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+    }
+
+    .tier-pill {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 5px 12px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+
+    .tier-pill.vip {
+      background: rgba(231, 184, 75, 0.15);
+      color: var(--gold);
+      border: 1px solid rgba(231, 184, 75, 0.4);
+    }
+
+    .tier-pill.reg {
+      background: rgba(53, 201, 181, 0.15);
+      color: var(--teal);
+      border: 1px solid rgba(53, 201, 181, 0.4);
+    }
+
+    .seat-id {
+      font-family: 'Space Mono', monospace;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .seat-price {
+      font-size: 15px;
+      color: var(--text-dim);
+    }
+
+    button {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      border: none;
+      border-radius: 8px;
+      padding: 13px 22px;
+      cursor: pointer;
+      transition: transform 0.08s ease, opacity 0.15s ease;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--gold);
+      color: #1a1420;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+
+    .btn-confirm {
+      background: var(--success);
+      color: #0d2318;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--text-dim);
+    }
+
+    .btn-cancel:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    /* ---------- Held state ---------- */
+    .held-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .countdown {
+      font-family: 'Space Mono', monospace;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--gold);
+      min-width: 90px;
+    }
+
+    .countdown.urgent {
+      color: var(--danger);
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    .held-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* ---------- Ticket stub (the signature element) ---------- */
+    .ticket-wrap {
+      display: flex;
+      margin-top: 6px;
+      filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.4));
+    }
+
+    .ticket-main {
+      flex: 1;
+      background: linear-gradient(135deg, #241c3c, #1a1430);
+      border: 1px solid var(--line);
+      border-right: none;
+      border-radius: 14px 0 0 14px;
+      padding: 24px;
+    }
+
+    .ticket-stub {
+      width: 110px;
+      background: linear-gradient(135deg, #241c3c, #1a1430);
+      border: 1px solid var(--line);
+      border-left: none;
+      border-radius: 0 14px 14px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .perforation {
+      width: 0;
+      border-left: 2px dashed var(--line);
+      position: relative;
+    }
+
+    .perforation::before,
+    .perforation::after {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: var(--bg);
+      border-radius: 50%;
+      left: -11px;
+    }
+
+    .perforation::before {
+      top: -10px;
+    }
+
+    .perforation::after {
+      bottom: -10px;
+    }
+
+    .ticket-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--teal);
+      text-transform: uppercase;
+    }
+
+    .ticket-event {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      color: var(--gold);
+      margin: 4px 0 14px;
+    }
+
+    .ticket-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .ticket-field .k {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .ticket-field .v {
+      font-family: 'Space Mono', monospace;
+      font-size: 16px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .ticket-code {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 16px;
+      word-break: break-all;
+    }
+
+    .barcode {
+      display: flex;
+      gap: 2px;
+      align-items: flex-end;
+      height: 46px;
+      transform: rotate(90deg);
+    }
+
+    .barcode span {
+      width: 3px;
+      background: var(--text-dim);
+      opacity: 0.7;
+    }
+
+    /* ---------- Activity log ---------- */
+    .log {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--text-dim);
+      max-height: 160px;
+      overflow-y: auto;
+    }
+
+    .log div {
+      padding: 4px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .log div:last-child {
+      border-bottom: none;
+    }
+
+    .log .ok {
+      color: var(--success);
+    }
+
+    .log .err {
+      color: var(--danger);
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 14px;
+      padding: 10px 0;
+    }
+
+    .sold-out {
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .sold-out .big {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 40px;
+      color: var(--danger);
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="eyebrow">Box Office — Live Demo</div>
+      <h1 id="event-name">Loading…</h1>
+      <div class="subline" id="event-date"></div>
+      <div class="stat-row">
+        <div class="stat">
+          <div class="num" id="stat-remaining">-</div>
+          <div class="label">Seats Left</div>
+        </div>
+        <div class="stat">
+          <div class="num" id="stat-total">-</div>
+          <div class="label">Total Seats</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Idle state: nothing held yet -->
+    <div class="panel" id="panel-idle">
+      <h2>Next Available Seat</h2>
+      <div class="next-seat-row" id="next-seat-row">
+        <div class="empty-state">Checking availability…</div>
+      </div>
+    </div>
+
+    <!-- Held state: a seat is on hold, counting down -->
+    <div class="panel" id="panel-held" style="display:none;">
+      <h2>Your Seat Is On Hold</h2>
+      <div class="held-row">
+        <div class="seat-preview">
+          <span class="tier-pill" id="held-tier-pill"></span>
+          <span class="seat-id" id="held-seat-id"></span>
+          <span class="seat-price" id="held-price"></span>
+        </div>
+        <div class="countdown" id="countdown">2:00</div>
+      </div>
+      <div class="held-actions" style="margin-top:18px;">
+        <button class="btn-confirm" id="btn-confirm">Confirm &amp; Pay</button>
+        <button class="btn-cancel" id="btn-cancel">Release Seat</button>
+      </div>
+    </div>
+
+    <!-- Confirmed state: ticket stub -->
+    <div id="panel-ticket" style="display:none;">
+      <div class="panel">
+        <h2>Booking Confirmed</h2>
+        <div class="ticket-wrap">
+          <div class="ticket-main">
+            <div class="ticket-eyebrow">Admit One</div>
+            <div class="ticket-event" id="ticket-event-name"></div>
+            <div class="ticket-grid">
+              <div class="ticket-field">
+                <div class="k">Seat</div>
+                <div class="v" id="ticket-seat"></div>
+              </div>
+              <div class="ticket-field">
+                <div class="k">Tier</div>
+                <div class="v" id="ticket-tier"></div>
+              </div>
+              <div class="ticket-field">
+                <div class="k">Price</div>
+                <div class="v" id="ticket-price"></div>
+              </div>
+              <div class="ticket-field">
+                <div class="k">Date</div>
+                <div class="v" id="ticket-date"></div>
+              </div>
+            </div>
+            <div class="ticket-code" id="ticket-code"></div>
+          </div>
+          <div class="ticket-stub">
+            <div class="perforation"></div>
+            <div class="barcode" id="barcode"></div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:center;">
+        <button class="btn-cancel" id="btn-book-another">Book Another Seat</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Activity Log</h2>
+      <div class="log" id="log">
+        <div class="empty-state" id="log-empty">Nothing yet — reserve a seat above.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const EVENT_ID = "E2026-F1";
+    const API = ""; // same-origin, Flask serves this file itself
+
+    let currentToken = null;
+    let countdownTimer = null;
+
+    function logLine(text, kind) {
+      const log = document.getElementById("log");
+      const empty = document.getElementById("log-empty");
+      if (empty) empty.remove();
+      const line = document.createElement("div");
+      const time = new Date().toLocaleTimeString();
+      line.innerHTML = `<span class="${kind || ''}">[${time}] ${text}</span>`;
+      log.prepend(line);
+    }
+
+    async function refreshEventStats() {
+      try {
+        const res = await fetch(`${API}/events/${EVENT_ID}`);
+        if (!res.ok) throw new Error(`Server responded ${res.status}`);
+        const data = await res.json();
+        document.getElementById("event-name").textContent = data.name || "Unknown Event";
+        document.getElementById("event-date").textContent = data.date || "";
+        document.getElementById("stat-remaining").textContent = data.seats_remaining ?? "-";
+        document.getElementById("stat-total").textContent = data.total_seats ?? "-";
+        return data;
+      } catch (err) {
+        document.getElementById("event-name").textContent = "Connection error";
+        document.getElementById("event-date").textContent = String(err);
+        logLine(`Failed to load event: ${err}. Are you viewing this via http://127.0.0.1:5000 (not a local file)?`, "err");
+      }
+    }
+
+    async function refreshNextSeat() {
+      const row = document.getElementById("next-seat-row");
+      try {
+        const res = await fetch(`${API}/events/${EVENT_ID}/next-seat`);
+        if (!res.ok) throw new Error(`Server responded ${res.status}`);
+        const data = await res.json();
+
+        if (!data.seat) {
+          row.innerHTML = `<div class="sold-out"><div class="big">SOLD OUT</div></div>`;
+          return;
+        }
+
+        const tierClass = data.seat.tier.toLowerCase().includes("vip") ? "vip" : "reg";
+        row.innerHTML = `
+      <div class="seat-preview">
+        <span class="tier-pill ${tierClass}">${data.seat.tier}</span>
+        <span class="seat-id">${data.seat.seat_id}</span>
+        <span class="seat-price">$${data.seat.price.toFixed(2)}</span>
+      </div>
+      <button class="btn-primary" id="btn-reserve">Reserve This Seat</button>
+    `;
+        document.getElementById("btn-reserve").onclick = reserveSeat;
+      } catch (err) {
+        row.innerHTML = `<div class="empty-state" style="color:var(--danger)">Couldn't reach the server: ${err}</div>`;
+        logLine(`Failed to load next seat: ${err}`, "err");
+      }
+    }
+
+    function showPanel(name) {
+      document.getElementById("panel-idle").style.display = name === "idle" ? "" : "none";
+      document.getElementById("panel-held").style.display = name === "held" ? "" : "none";
+      document.getElementById("panel-ticket").style.display = name === "ticket" ? "" : "none";
+    }
+
+    async function reserveSeat() {
+      try {
+        const res = await fetch(`${API}/events/${EVENT_ID}/select`, { method: "POST" });
+        const data = await res.json();
+        if (!res.ok) { logLine(`Reserve failed: ${data.error}`, "err"); return; }
+
+        currentToken = data.token;
+        logLine(`Reserved ${data.seat_id} (${data.tier}, $${data.price}) — token ${data.token.slice(0, 8)}…`, "ok");
+
+        const tierClass = data.tier.toLowerCase().includes("vip") ? "vip" : "reg";
+        document.getElementById("held-tier-pill").textContent = data.tier;
+        document.getElementById("held-tier-pill").className = `tier-pill ${tierClass}`;
+        document.getElementById("held-seat-id").textContent = data.seat_id;
+        document.getElementById("held-price").textContent = `$${data.price.toFixed(2)}`;
+
+        showPanel("held");
+        startCountdown(data.expires_at);
+        await refreshEventStats();
+      } catch (err) {
+        logLine(`Network error: ${err}`, "err");
+      }
+    }
+
+    function startCountdown(expiresAt) {
+      clearInterval(countdownTimer);
+      const el = document.getElementById("countdown");
+
+      function tick() {
+        const remaining = Math.max(0, expiresAt - (Date.now() / 1000));
+        const mins = Math.floor(remaining / 60);
+        const secs = Math.floor(remaining % 60);
+        el.textContent = `${mins}:${secs.toString().padStart(2, "0")}`;
+        el.classList.toggle("urgent", remaining <= 15);
+
+        if (remaining <= 0) {
+          clearInterval(countdownTimer);
+          logLine("Hold expired — seat returned to availability.", "err");
+          currentToken = null;
+          showPanel("idle");
+          refreshEventStats();
+          refreshNextSeat();
+        }
+      }
+      tick();
+      countdownTimer = setInterval(tick, 1000);
+    }
+
+    async function confirmBooking() {
+      if (!currentToken) return;
+      try {
+        const res = await fetch(`${API}/bookings/${currentToken}/confirm`, { method: "POST" });
+        const data = await res.json();
+        if (!res.ok) {
+          logLine(`Confirm failed: ${data.error}`, "err");
+          showPanel("idle");
+          await refreshEventStats();
+          await refreshNextSeat();
+          return;
+        }
+        clearInterval(countdownTimer);
+        logLine(`Confirmed ${data.seat_id} for ${data.event_id}.`, "ok");
+        renderTicket(data);
+        showPanel("ticket");
+        await refreshEventStats();
+      } catch (err) {
+        logLine(`Network error: ${err}`, "err");
+      }
+    }
+
+    async function cancelBooking() {
+      if (!currentToken) return;
+      try {
+        const res = await fetch(`${API}/bookings/${currentToken}/cancel`, { method: "POST" });
+        const data = await res.json();
+        clearInterval(countdownTimer);
+        if (res.ok) logLine(`Released ${data.seat_id} back to the pool.`, "ok");
+        else logLine(`Cancel failed: ${data.error}`, "err");
+        currentToken = null;
+        showPanel("idle");
+        await refreshEventStats();
+        await refreshNextSeat();
+      } catch (err) {
+        logLine(`Network error: ${err}`, "err");
+      }
+    }
+
+    function renderTicket(confirmData) {
+      const eventName = document.getElementById("event-name").textContent;
+      const eventDate = document.getElementById("event-date").textContent;
+      document.getElementById("ticket-event-name").textContent = eventName;
+      document.getElementById("ticket-seat").textContent = confirmData.seat_id;
+      document.getElementById("ticket-date").textContent = eventDate;
+
+      // tier/price aren't in the confirm response, so pull from the last held values
+      const tier = document.getElementById("held-tier-pill").textContent;
+      const price = document.getElementById("held-price").textContent;
+      document.getElementById("ticket-tier").textContent = tier;
+      document.getElementById("ticket-price").textContent = price;
+
+      const code = (currentToken || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 16);
+      document.getElementById("ticket-code").textContent = `TICKET CODE  ${code}`;
+
+      const barcode = document.getElementById("barcode");
+      barcode.innerHTML = "";
+      for (let i = 0; i < 28; i++) {
+        const bar = document.createElement("span");
+        bar.style.height = `${20 + Math.floor(Math.random() * 26)}px`;
+        barcode.appendChild(bar);
+      }
+
+      currentToken = null;
+    }
+
+    document.getElementById("btn-confirm").onclick = confirmBooking;
+    document.getElementById("btn-cancel").onclick = cancelBooking;
+    document.getElementById("btn-book-another").onclick = async () => {
+      showPanel("idle");
+      await refreshNextSeat();
+    };
+
+    (async function init() {
+      await refreshEventStats();
+      await refreshNextSeat();
+      showPanel("idle");
+    })();
+  </script>
+</body>
+</html>
