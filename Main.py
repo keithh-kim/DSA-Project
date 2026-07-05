@@ -21,7 +21,7 @@ import threading
 import time
 
 from event_registry import EventRegistry
-from Api import BookingService, create_app
+from api import BookingService, create_app
 
 
 def seed_demo_event(service: BookingService) -> str:
