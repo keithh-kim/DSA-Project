@@ -185,11 +185,13 @@ class BookingService:
             token = self.held_seats.hold_seat(seat=seat, event_id=event_id)  # Evans: O(1)
 
         self._seat_cache[(event_id, seat.seat_id)] = seat
+        hold = self.held_seats.get_hold(token)
         return {
             "token": token,
             "seat_id": seat.seat_id,
             "tier": seat.tier,
             "price": seat.price,
+            "expires_at": hold.expires_at if hold is not None else None,
         }
 
     # ---- CONFIRM / CANCEL: delegate straight to Wilson's real class ----
