@@ -9,7 +9,7 @@ import time
 import threading
 import pytest
 
-from confirmation import ConfirmationManager, FakeHeldSeatsStore, FakeHeap
+from event_confirmation import ConfirmationManager, FakeHeldSeatsStore, FakeHeap
 
 
 # ---------------------------------------------------------------------------
